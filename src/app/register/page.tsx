@@ -17,10 +17,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Mail, User, UserCheck2, Lock, Eye, EyeOff } from "lucide-react";
-import React, { ChangeEvent, useState } from "react";
+import Link from "next/link";
+import React, { ChangeEvent, useActionState, useEffect, useState } from "react";
+import registerFormAction, { RegisterState } from "./registerForm.action";
+import { useFormStatus } from "react-dom";
+import { redirect } from "next/navigation";
 
-interface RegistrationFormData {
-  userName: string;
+export interface RegistrationFormData {
+  fullName: string;
   userId: string;
   email: string;
   password: string;
@@ -29,9 +33,17 @@ interface RegistrationFormData {
 }
 
 const RegistrationPage: React.FC = () => {
+  const initialState: RegisterState = {
+    success: false,
+    message: "",
+  };
+  const [state, formAction, isPending] = useActionState(
+    registerFormAction,
+    initialState
+  );
   const [formData, setFormData] = useState<RegistrationFormData>({
     userId: "",
-    userName: "",
+    fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -48,12 +60,22 @@ const RegistrationPage: React.FC = () => {
     }));
   };
 
-  //   console.log(formData);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log(formData);
-  };
+  useEffect(() => {
+    if (state?.success) {
+      setFormData({
+        userId: "",
+        fullName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        role: "applicant",
+      });
+      console.log(formData);
+      setTimeout(() => {
+        redirect("/login");
+      }, 2000);
+    }
+  }, [state?.success]);
 
   return (
     <div className='min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4'>
@@ -70,11 +92,11 @@ const RegistrationPage: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className='space-y-5' onSubmit={handleSubmit}>
+          <form className='space-y-5' action={formAction}>
             {/* Username */}
             <div className='space-y-2'>
               <Label
-                htmlFor='userName'
+                htmlFor='fullName'
                 className='text-sm font-semibold text-gray-700'
               >
                 FullName
@@ -83,12 +105,13 @@ const RegistrationPage: React.FC = () => {
                 <User className='absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400' />
                 <Input
                   type='text'
-                  id='userName'
+                  id='fullName'
+                  name='fullName'
                   placeholder='Enter Your FullName'
                   required
-                  value={formData.userName}
+                  value={formData.fullName}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    handleInputChange("userName", e.target.value);
+                    handleInputChange("fullName", e.target.value);
                   }}
                   className='pl-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                 />
@@ -108,6 +131,7 @@ const RegistrationPage: React.FC = () => {
                 <Input
                   type='text'
                   id='userId'
+                  name='userId'
                   placeholder='Enter Your userid'
                   required
                   value={formData.userId}
@@ -132,6 +156,7 @@ const RegistrationPage: React.FC = () => {
                 <Input
                   type='email'
                   id='email'
+                  name='email'
                   placeholder='Enter Your email address'
                   required
                   value={formData.email}
@@ -156,6 +181,7 @@ const RegistrationPage: React.FC = () => {
                 <Input
                   type={showPassword ? "text" : "password"}
                   id='password'
+                  name='password'
                   placeholder='Enter Your Password'
                   required
                   value={formData.password}
@@ -191,6 +217,7 @@ const RegistrationPage: React.FC = () => {
                 <Input
                   type={showConfirmPassword ? "text" : "password"}
                   id='confirmPassword'
+                  name='confirmPassword'
                   placeholder='Enter Your Password Again'
                   required
                   value={formData.confirmPassword}
@@ -221,6 +248,7 @@ const RegistrationPage: React.FC = () => {
               <div className=''>
                 <Select
                   value={formData.role}
+                  name='role'
                   onValueChange={(value: "applicant" | "employer") =>
                     handleInputChange("role", value)
                   }
@@ -238,15 +266,15 @@ const RegistrationPage: React.FC = () => {
 
             {/* Submit Button */}
             <div className='pt-2'>
-              <Button
-                type='submit'
-                onClick={handleSubmit}
-                className='w-full h-12 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200'
-              >
-                Register
-              </Button>
+              <SubmitButton />
             </div>
-          </div>
+            <div className='text-center space-y-2'>
+              <span>Already Registered? </span>
+              <Link href={"/login"} className='text-blue-500'>
+                Login here
+              </Link>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>
@@ -254,3 +282,16 @@ const RegistrationPage: React.FC = () => {
 };
 
 export default RegistrationPage;
+
+const SubmitButton = () => {
+  const { data, pending } = useFormStatus();
+  return (
+    <Button
+      type='submit'
+      disabled={pending}
+      className='w-full h-12 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200'
+    >
+      {pending ? "Registering..." : " Register"}
+    </Button>
+  );
+};
