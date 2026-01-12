@@ -16,12 +16,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Mail, User, UserCheck2, Lock, Eye, EyeOff } from "lucide-react";
+import {
+  Mail,
+  User,
+  UserCheck2,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 import React, { ChangeEvent, useActionState, useEffect, useState } from "react";
 import registerFormAction, { RegisterState } from "./registerForm.action";
 import { useFormStatus } from "react-dom";
 import { redirect } from "next/navigation";
+import { toast } from "sonner";
 
 export interface RegistrationFormData {
   fullName: string;
@@ -29,7 +38,7 @@ export interface RegistrationFormData {
   email: string;
   password: string;
   confirmPassword: string;
-  role: "applicant" | "employer";
+  role: "applicant" | "employer" | "admin";
 }
 
 const RegistrationPage: React.FC = () => {
@@ -60,8 +69,15 @@ const RegistrationPage: React.FC = () => {
     }));
   };
 
+  // if (isPending) {
+  //   return <div>Loading...</div>;
+  // }
   useEffect(() => {
-    if (state?.success) {
+    if (!state.message) return;
+
+    if (state.success) {
+      toast.success(state.message);
+
       setFormData({
         userId: "",
         fullName: "",
@@ -70,17 +86,19 @@ const RegistrationPage: React.FC = () => {
         confirmPassword: "",
         role: "applicant",
       });
-      console.log(formData);
+
       setTimeout(() => {
         redirect("/login");
-      }, 2000);
+      }, 1000);
+    } else {
+      toast.error(state.message);
     }
-  }, [state?.success]);
+  }, [state]);
 
   return (
-    <div className='min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4'>
+    <div className='min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-2'>
       <Card className='w-full max-w-md shadow-2xl border-0'>
-        <CardHeader className='space-y-3 text-center pb-6'>
+        <CardHeader className='space-y-0.5 text-center pb-0.5'>
           <div className='mx-auto w-16 h-16 bg-linear-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg'>
             <UserCheck2 className='w-8 h-8 text-white' />
           </div>
@@ -92,9 +110,9 @@ const RegistrationPage: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className='space-y-5' action={formAction}>
+          <form className='space-y-0.5' action={formAction}>
             {/* Username */}
-            <div className='space-y-2'>
+            <div className='space-y-1'>
               <Label
                 htmlFor='fullName'
                 className='text-sm font-semibold text-gray-700'
@@ -119,7 +137,7 @@ const RegistrationPage: React.FC = () => {
             </div>
 
             {/* UserID */}
-            <div className='space-y-2'>
+            <div className='space-y-1'>
               <Label
                 htmlFor='userId'
                 className='text-sm font-semibold text-gray-700'
@@ -144,7 +162,7 @@ const RegistrationPage: React.FC = () => {
             </div>
 
             {/* Email */}
-            <div className='space-y-2'>
+            <div className='space-y-1'>
               <Label
                 htmlFor='email'
                 className='text-sm font-semibold text-gray-700'
@@ -169,7 +187,7 @@ const RegistrationPage: React.FC = () => {
             </div>
 
             {/* Password */}
-            <div className='space-y-2'>
+            <div className='space-y-1'>
               <Label
                 htmlFor='password'
                 className='text-sm font-semibold text-gray-700'
@@ -205,7 +223,7 @@ const RegistrationPage: React.FC = () => {
             </div>
 
             {/* Confirm Password */}
-            <div className='space-y-2'>
+            <div className='space-y-1'>
               <Label
                 htmlFor='confirmPassword'
                 className='text-sm font-semibold text-gray-700'
@@ -241,7 +259,7 @@ const RegistrationPage: React.FC = () => {
             </div>
 
             {/* Role */}
-            <div className='space-y-2 '>
+            <div className='space-y-1 '>
               <Label className='text-sm font-semibold text-gray-700'>
                 I am*
               </Label>
@@ -259,6 +277,7 @@ const RegistrationPage: React.FC = () => {
                   <SelectContent>
                     <SelectItem value='applicant'>Job Seeker</SelectItem>
                     <SelectItem value='employer'>Employer</SelectItem>
+                    <SelectItem value='admin'>Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -268,7 +287,7 @@ const RegistrationPage: React.FC = () => {
             <div className='pt-2'>
               <SubmitButton />
             </div>
-            <div className='text-center space-y-2'>
+            <div className='text-center space-y-1'>
               <span>Already Registered? </span>
               <Link href={"/login"} className='text-blue-500'>
                 Login here
@@ -291,7 +310,14 @@ const SubmitButton = () => {
       disabled={pending}
       className='w-full h-12 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200'
     >
-      {pending ? "Registering..." : " Register"}
+      {pending ? (
+        <>
+          <Loader2 className='h-5 w-5 animate-spin' />
+          Registering...
+        </>
+      ) : (
+        "Register"
+      )}
     </Button>
   );
 };

@@ -28,12 +28,11 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
       minLength: 5,
-      maxlength: 25,
     },
 
     role: {
       type: String,
-      enum: ["applicant", "employer"],
+      enum: ["applicant", "employer", "admin"],
       required: true,
       default: "applicant",
     },
