@@ -31,6 +31,7 @@ import registerFormAction, { RegisterState } from "./registerForm.action";
 import { useFormStatus } from "react-dom";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
+import SubmitButton from "@/components/common/SubmitButton";
 
 export interface RegistrationFormData {
   fullName: string;
@@ -285,7 +286,7 @@ const RegistrationPage: React.FC = () => {
 
             {/* Submit Button */}
             <div className='pt-2'>
-              <SubmitButton />
+              <SubmitButton buttonText='Register' loadingText='Regestering' />
             </div>
             <div className='text-center space-y-1'>
               <span>Already Registered? </span>
@@ -302,22 +303,22 @@ const RegistrationPage: React.FC = () => {
 
 export default RegistrationPage;
 
-const SubmitButton = () => {
-  const { data, pending } = useFormStatus();
-  return (
-    <Button
-      type='submit'
-      disabled={pending}
-      className='w-full h-12 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200'
-    >
-      {pending ? (
-        <>
-          <Loader2 className='h-5 w-5 animate-spin' />
-          Registering...
-        </>
-      ) : (
-        "Register"
-      )}
-    </Button>
-  );
-};
+// const SubmitButton = () => {
+//   const { data, pending } = useFormStatus();
+//   return (
+//     <Button
+//       type='submit'
+//       disabled={pending}
+//       className='w-full h-12 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200'
+//     >
+//       {pending ? (
+//         <>
+//           <Loader2 className='h-5 w-5 animate-spin' />
+//           Registering...
+//         </>
+//       ) : (
+//         "Register"
+//       )}
+//     </Button>
+//   );
+// };

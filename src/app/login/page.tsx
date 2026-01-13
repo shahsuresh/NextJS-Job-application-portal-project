@@ -11,7 +11,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Lock, User, UserCheck } from "lucide-react";
 import Link from "next/link";
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useActionState, useEffect, useState } from "react";
+import loginFormAction from "./loginUser.action";
+import { RegisterState } from "../register/registerForm.action";
+import { toast } from "sonner";
+import { redirect } from "next/navigation";
+import SubmitButton from "@/components/common/SubmitButton";
 interface LoginFormData {
   userId: string;
 
@@ -31,10 +36,24 @@ const LoginPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log(formData);
+  const initialState: RegisterState = {
+    success: false,
+    message: "",
   };
+
+  const [state, formAction] = useActionState(loginFormAction, initialState);
+
+  useEffect(() => {
+    if (!state.message) return;
+
+    if (state.success) {
+      toast.success(state.message);
+      redirect("/dashboard");
+    } else {
+      toast.error(state.message);
+    }
+  }, [state]);
+
   return (
     <div className='min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4'>
       <Card className='w-full max-w-md shadow-2xl border-0'>
@@ -50,21 +69,22 @@ const LoginPage: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className='space-y-5' onSubmit={handleSubmit}>
+          <form className='space-y-5' action={formAction}>
             {/* UserID */}
             <div className='space-y-2'>
               <Label
                 htmlFor='userId'
                 className='text-sm font-semibold text-gray-700'
               >
-                Username
+                Username/email
               </Label>
               <div className='relative'>
                 <User className='absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400' />
                 <Input
                   type='text'
                   id='userId'
-                  placeholder='Enter Your userid'
+                  name='userId'
+                  placeholder='Enter Your userid or email'
                   required
                   value={formData.userId}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -74,30 +94,6 @@ const LoginPage: React.FC = () => {
                 />
               </div>
             </div>
-
-            {/* Email */}
-            {/* <div className='space-y-2'>
-              <Label
-                htmlFor='email'
-                className='text-sm font-semibold text-gray-700'
-              >
-                Email
-              </Label>
-              <div className='relative'>
-                <Mail className='absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400' />
-                <Input
-                  type='email'
-                  id='email'
-                  placeholder='Enter Your email address'
-                  required
-                  value={formData.email}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    handleInputChange("email", e.target.value);
-                  }}
-                  className='pl-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
-                />
-              </div>
-            </div> */}
 
             {/* Password */}
             <div className='space-y-2'>
@@ -112,6 +108,7 @@ const LoginPage: React.FC = () => {
                 <Input
                   type={showPassword ? "text" : "password"}
                   id='password'
+                  name='password'
                   placeholder='Enter Your Password'
                   required
                   value={formData.password}
@@ -136,13 +133,7 @@ const LoginPage: React.FC = () => {
 
             {/* Submit Button */}
             <div className='pt-2'>
-              <Button
-                type='submit'
-                onClick={handleSubmit}
-                className='w-full h-12 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200'
-              >
-                Login
-              </Button>
+              <SubmitButton buttonText='Login' loadingText='Logging...' />
             </div>
             <div className='text-center space-y-2'>
               <span>Don't have an account? </span>

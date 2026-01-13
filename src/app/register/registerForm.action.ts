@@ -23,13 +23,21 @@ const registerFormAction = async (
         message: "Password and Confirm Password do not match",
       };
     }
+
     await connectDB();
     const existingUser = await User.findOne({ $or: [{ email }, { userId }] });
     if (existingUser) {
-      return {
-        success: false,
-        message: "User with this email or username already exists",
-      };
+      if (existingUser.email === email) {
+        return {
+          success: false,
+          message: "User with this email already exists",
+        };
+      } else {
+        return {
+          success: false,
+          message: "User with this username already exists",
+        };
+      }
     }
     const hashedPassword = await argon2.hash(password);
 
