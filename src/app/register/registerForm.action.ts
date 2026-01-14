@@ -1,5 +1,6 @@
 "use server";
 
+import { registerUserValidationSchema } from "@/features/auth/validationSchemas";
 import connectDB from "@/lib/db";
 import User from "@/models/user.model";
 import argon2 from "argon2";
@@ -15,6 +16,22 @@ const registerFormAction = async (
 ): Promise<RegisterState> => {
   const { fullName, userId, email, password, confirmPassword, role } =
     Object.fromEntries(formData) as Record<string, string>;
+
+  const { data: validatedData, error } = registerUserValidationSchema.safeParse(
+    {
+      fullName,
+      userId,
+      email,
+      password,
+      confirmPassword,
+      role,
+    }
+  );
+  // delete validatedData.confirmPassword;
+
+  console.log("VALIDATED DATA", validatedData);
+
+  if (error) return { success: false, message: error.issues[0].message };
 
   try {
     if (password !== confirmPassword) {

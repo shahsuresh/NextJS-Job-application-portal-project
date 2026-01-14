@@ -20,7 +20,7 @@ const loginFormAction = async (
     if (!isUserExist) {
       return {
         success: false,
-        message: `User with this userId or email doesnot exists.`,
+        message: `Invalid Credentials`,
       };
     }
     console.log(isUserExist);
