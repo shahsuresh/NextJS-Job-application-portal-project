@@ -4,13 +4,21 @@ import connectDB from "@/lib/db";
 import { RegisterState } from "../register/registerForm.action";
 import User from "@/models/user.model";
 import { RegistrationFormData } from "../register/page";
+import { LoginFormData } from "./page";
+import { loginUserValidationSchema } from "@/features/auth/validationSchemas";
 
 const loginFormAction = async (
-  prevState: RegisterState | null,
-  formData: FormData
+  loginFormData: LoginFormData,
 ): Promise<RegisterState> => {
-  const { userId, password } = Object.fromEntries(formData);
+  // const { userId, password } = Object.fromEntries(formData);
   // console.log(userId, password);
+
+  const validatedData = loginUserValidationSchema.safeParse(loginFormData);
+  if (!validatedData.success) {
+    return { success: false, message: validatedData.error.issues[0].message };
+  }
+
+  const { userId, password } = validatedData.data;
   try {
     await connectDB();
     const isUserExist: RegistrationFormData | null = await User.findOne({
@@ -27,7 +35,7 @@ const loginFormAction = async (
     const hashedPassword = isUserExist?.password;
     const isPasswordMatch = await argon2.verify(
       hashedPassword,
-      String(password)
+      String(password),
     );
     console.log(isPasswordMatch);
 

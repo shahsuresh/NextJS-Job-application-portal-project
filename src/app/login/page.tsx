@@ -17,42 +17,61 @@ import { RegisterState } from "../register/registerForm.action";
 import { toast } from "sonner";
 import { redirect } from "next/navigation";
 import SubmitButton from "@/components/common/SubmitButton";
-interface LoginFormData {
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginUserValidationSchema } from "@/features/auth/validationSchemas";
+export interface LoginFormData {
   userId: string;
 
   password: string;
 }
 const LoginPage: React.FC = () => {
-  const [formData, setFormData] = useState<LoginFormData>({
-    userId: "",
-    password: "",
-  });
+  // const [formData, setFormData] = useState<LoginFormData>({
+  //   userId: "",
+  //   password: "",
+  // });
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [field]: value,
-    }));
-  };
+  // const handleInputChange = (field: string, value: string) => {
+  //   setFormData((prevData) => ({
+  //     ...prevData,
+  //     [field]: value,
+  //   }));
+  // };
 
-  const initialState: RegisterState = {
-    success: false,
-    message: "",
-  };
+  // const initialState: RegisterState = {
+  //   success: false,
+  //   message: "",
+  // };
 
-  const [state, formAction] = useActionState(loginFormAction, initialState);
+  // const [state, formAction] = useActionState(loginFormAction, initialState);
 
-  useEffect(() => {
-    if (!state.message) return;
+  // useEffect(() => {
+  //   if (!state.message) return;
 
-    if (state.success) {
-      toast.success(state.message);
+  //   if (state.success) {
+  //     toast.success(state.message);
+  //     redirect("/dashboard");
+  //   } else {
+  //     toast.error(state.message);
+  //   }
+  // }, [state]);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({ resolver: zodResolver(loginUserValidationSchema) });
+
+  const onSubmit = async (data: LoginFormData) => {
+    const result = await loginFormAction(data);
+    if (result.success) {
+      toast.success(result.message);
       redirect("/dashboard");
     } else {
-      toast.error(state.message);
+      toast.error(result.message);
     }
-  }, [state]);
+  };
 
   return (
     <div className='min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4'>
@@ -69,7 +88,7 @@ const LoginPage: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className='space-y-5' action={formAction}>
+          <form className='space-y-5' onSubmit={handleSubmit(onSubmit)}>
             {/* UserID */}
             <div className='space-y-2'>
               <Label
@@ -83,13 +102,9 @@ const LoginPage: React.FC = () => {
                 <Input
                   type='text'
                   id='userId'
-                  name='userId'
+                  {...register("userId")}
                   placeholder='Enter Your userid or email'
                   required
-                  value={formData.userId}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    handleInputChange("userId", e.target.value);
-                  }}
                   className='pl-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                 />
               </div>
@@ -108,13 +123,8 @@ const LoginPage: React.FC = () => {
                 <Input
                   type={showPassword ? "text" : "password"}
                   id='password'
-                  name='password'
+                  {...register("password")}
                   placeholder='Enter Your Password'
-                  required
-                  value={formData.password}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    handleInputChange("password", e.target.value);
-                  }}
                   className='pl-11 pr-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                 />
                 <button
@@ -133,7 +143,11 @@ const LoginPage: React.FC = () => {
 
             {/* Submit Button */}
             <div className='pt-2'>
-              <SubmitButton buttonText='Login' loadingText='Logging...' />
+              <SubmitButton
+                buttonText='Login'
+                loadingText='Logging...'
+                isLoading={isSubmitting}
+              />
             </div>
             <div className='text-center space-y-2'>
               <span>Don't have an account? </span>

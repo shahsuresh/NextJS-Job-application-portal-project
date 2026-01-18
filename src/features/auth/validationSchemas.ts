@@ -18,7 +18,7 @@ export const registerUserValidationSchema = z
       .max(25, "Username cannot be more than 25 characters")
       .regex(
         /^[a-zA-Z0-9_-]+$/,
-        "Username can only contain letters, numbers, underscores, and hyphens"
+        "Username can only contain letters, numbers, underscores, and hyphens",
       ),
 
     email: z
@@ -44,3 +44,10 @@ export const registerUserValidationSchema = z
   });
 
 export type RegisterValidation = z.infer<typeof registerUserValidationSchema>;
+
+//# user login Data Validation
+
+export const loginUserValidationSchema = z.object({
+  userId: z.string().trim().nonempty("Username or Email is required"),
+  password: z.string().trim().nonempty("Password is required to login"),
+});

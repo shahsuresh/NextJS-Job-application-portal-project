@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,7 +16,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Mail, User, UserCheck2, Lock, Eye, EyeOff } from "lucide-react";
+import {
+  Mail,
+  User,
+  UserCheck2,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 import React, { ChangeEvent, useActionState, useEffect, useState } from "react";
 import registerFormAction, { RegisterState } from "./registerForm.action";
@@ -23,10 +32,6 @@ import { useFormStatus } from "react-dom";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
 import SubmitButton from "@/components/common/SubmitButton";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { registerUserValidationSchema } from "@/features/auth/validationSchemas";
-import { FieldError } from "@/components/common/ErrorMessage";
 
 export interface RegistrationFormData {
   fullName: string;
@@ -42,53 +47,54 @@ const RegistrationPage: React.FC = () => {
     success: false,
     message: "",
   };
-  // const [state, formAction, isPending] = useActionState(
-  //   registerFormAction,
-  //   initialState
-  // );
-  //! react-hook-form setup to handle form
-
-  const {
-    register,
-    control,
-    handleSubmit,
-    watch,
-    formState: { errors, isSubmitting },
-  } = useForm({
-    resolver: zodResolver(registerUserValidationSchema),
+  const [state, formAction, isPending] = useActionState(
+    registerFormAction,
+    initialState
+  );
+  const [formData, setFormData] = useState<RegistrationFormData>({
+    userId: "",
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "applicant",
   });
-
-  //# onSubmit function to call server Action
-
-  const onSubmit = async (data: RegistrationFormData) => {
-    const result = await registerFormAction(data);
-
-    if (result.success) {
-      toast.success(result.message);
-      redirect("/login");
-    } else {
-      toast.error(result.message);
-    }
-  };
-
-  // console.log(watch("fullName"));
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // useEffect(() => {
-  //   if (!state.message) return;
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [field]: value,
+    }));
+  };
 
-  //   if (state.success) {
-  //     toast.success(state.message);
+  // if (isPending) {
+  //   return <div>Loading...</div>;
+  // }
+  useEffect(() => {
+    if (!state.message) return;
 
-  //     setTimeout(() => {
-  //       redirect("/login");
-  //     }, 1000);
-  //   } else {
-  //     toast.error(state.message);
-  //   }
-  // }, [state]);
+    if (state.success) {
+      toast.success(state.message);
+
+      setFormData({
+        userId: "",
+        fullName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        role: "applicant",
+      });
+
+      setTimeout(() => {
+        redirect("/login");
+      }, 1000);
+    } else {
+      toast.error(state.message);
+    }
+  }, [state]);
 
   return (
     <div className='min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-2'>
@@ -105,11 +111,7 @@ const RegistrationPage: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form
-            className='space-y-0.5'
-            // action={formAction}
-            onSubmit={handleSubmit(onSubmit)}
-          >
+          <form className='space-y-0.5' action={formAction}>
             {/* Username */}
             <div className='space-y-1'>
               <Label
@@ -123,11 +125,15 @@ const RegistrationPage: React.FC = () => {
                 <Input
                   type='text'
                   id='fullName'
-                  {...register("fullName")}
+                  name='fullName'
                   placeholder='Enter Your FullName'
+                  required
+                  value={formData.fullName}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    handleInputChange("fullName", e.target.value);
+                  }}
                   className='pl-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                 />
-                <FieldError error={errors.fullName?.message} />
               </div>
             </div>
 
@@ -144,11 +150,15 @@ const RegistrationPage: React.FC = () => {
                 <Input
                   type='text'
                   id='userId'
+                  name='userId'
                   placeholder='Enter Your userid'
-                  {...register("userId")}
+                  required
+                  value={formData.userId}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    handleInputChange("userId", e.target.value);
+                  }}
                   className='pl-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                 />
-                <FieldError error={errors.userId?.message} />
               </div>
             </div>
 
@@ -165,12 +175,16 @@ const RegistrationPage: React.FC = () => {
                 <Input
                   type='email'
                   id='email'
-                  {...register("email")}
+                  name='email'
                   placeholder='Enter Your email address'
+                  required
+                  value={formData.email}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    handleInputChange("email", e.target.value);
+                  }}
                   className='pl-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                 />
               </div>
-              <FieldError error={errors.email?.message} />
             </div>
 
             {/* Password */}
@@ -186,8 +200,13 @@ const RegistrationPage: React.FC = () => {
                 <Input
                   type={showPassword ? "text" : "password"}
                   id='password'
-                  {...register("password")}
+                  name='password'
                   placeholder='Enter Your Password'
+                  required
+                  value={formData.password}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    handleInputChange("password", e.target.value);
+                  }}
                   className='pl-11 pr-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                 />
                 <button
@@ -202,7 +221,6 @@ const RegistrationPage: React.FC = () => {
                   )}
                 </button>
               </div>
-              <FieldError error={errors.password?.message} />
             </div>
 
             {/* Confirm Password */}
@@ -218,8 +236,13 @@ const RegistrationPage: React.FC = () => {
                 <Input
                   type={showConfirmPassword ? "text" : "password"}
                   id='confirmPassword'
-                  {...register("confirmPassword")}
+                  name='confirmPassword'
                   placeholder='Enter Your Password Again'
+                  required
+                  value={formData.confirmPassword}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    handleInputChange("confirmPassword", e.target.value);
+                  }}
                   className='pl-11 pr-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                 />
                 <button
@@ -234,7 +257,6 @@ const RegistrationPage: React.FC = () => {
                   )}
                 </button>
               </div>
-              <FieldError error={errors.confirmPassword?.message} />
             </div>
 
             {/* Role */}
@@ -243,32 +265,28 @@ const RegistrationPage: React.FC = () => {
                 I am*
               </Label>
               <div className=''>
-                <Controller
+                <Select
+                  value={formData.role}
                   name='role'
-                  control={control}
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className='h-11'>
-                        <SelectValue placeholder='Select your role' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value='applicant'>Job Seeker</SelectItem>
-                        <SelectItem value='employer'>Employer</SelectItem>
-                        <SelectItem value='admin'>Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
+                  onValueChange={(value: "applicant" | "employer") =>
+                    handleInputChange("role", value)
+                  }
+                >
+                  <SelectTrigger className=' w-full h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'>
+                    <SelectValue placeholder='Select Your Role' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='applicant'>Job Seeker</SelectItem>
+                    <SelectItem value='employer'>Employer</SelectItem>
+                    <SelectItem value='admin'>Admin</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
             {/* Submit Button */}
             <div className='pt-2'>
-              <SubmitButton
-                buttonText='Register'
-                loadingText='Regestering'
-                isLoading={isSubmitting}
-              />
+              <SubmitButton buttonText='Register' loadingText='Regestering' />
             </div>
             <div className='text-center space-y-1'>
               <span>Already Registered? </span>
@@ -284,3 +302,23 @@ const RegistrationPage: React.FC = () => {
 };
 
 export default RegistrationPage;
+
+// const SubmitButton = () => {
+//   const { data, pending } = useFormStatus();
+//   return (
+//     <Button
+//       type='submit'
+//       disabled={pending}
+//       className='w-full h-12 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200'
+//     >
+//       {pending ? (
+//         <>
+//           <Loader2 className='h-5 w-5 animate-spin' />
+//           Registering...
+//         </>
+//       ) : (
+//         "Register"
+//       )}
+//     </Button>
+//   );
+// };
