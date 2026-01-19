@@ -85,6 +85,7 @@
 
 "use server";
 
+import { createSessionsAndSetCookies } from "@/features/auth/sessions";
 import { registerUserValidationSchema } from "@/features/auth/validationSchemas";
 import connectDB from "@/lib/db";
 import User from "@/models/user.model";
@@ -105,7 +106,7 @@ type RegisterPayload = {
 };
 
 const registerFormAction = async (
-  registerFormData: RegisterPayload
+  registerFormData: RegisterPayload,
 ): Promise<RegisterState> => {
   const validatedFormData =
     registerUserValidationSchema.safeParse(registerFormData);
@@ -138,13 +139,17 @@ const registerFormAction = async (
 
     const hashedPassword = await argon2.hash(password);
 
-    await User.create({
+    const newUser = await User.create({
       fullName,
       userId,
       email,
       password: hashedPassword,
       role,
     });
+
+    // create session data and set cookies in browser after successfull registration
+
+    await createSessionsAndSetCookies(newUser._id);
 
     return {
       success: true,

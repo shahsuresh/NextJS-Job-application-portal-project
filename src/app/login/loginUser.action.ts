@@ -7,6 +7,7 @@ import { RegistrationFormData } from "../register/page";
 import { LoginFormData } from "./page";
 import { loginUserValidationSchema } from "@/features/auth/validationSchemas";
 import { createSessionsAndSetCookies } from "@/features/auth/sessions";
+import { cookies } from "next/headers";
 
 const loginFormAction = async (
   loginFormData: LoginFormData,
@@ -46,6 +47,8 @@ const loginFormAction = async (
         message: `Invalid Credentials`,
       };
     }
+    //store user session data in Session table in database and set cookies data
+
     const sessionData = await createSessionsAndSetCookies(isUserExist._id);
     console.log("SESSION DATA", sessionData);
     console.log(isUserExist._id);

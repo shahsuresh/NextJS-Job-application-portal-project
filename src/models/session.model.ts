@@ -1,10 +1,13 @@
 import mongoose from "mongoose";
-import { string } from "zod";
 
 const sessionSchema = new mongoose.Schema(
   {
-    token: { type: string },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    token: { type: String, required: true, index: true },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
 
     userAgent: {
       // to store browser/device infomation
@@ -24,6 +27,7 @@ const sessionSchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
       required: true,
+      index: true,
     },
   },
   { timestamps: true },

@@ -1,7 +1,9 @@
 import { SESSION_LIFETIME } from "@/config/constants";
+import connectDB from "@/lib/db";
 import Session from "@/models/session.model";
+import User from "@/models/user.model";
 import crypto from "crypto";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 //! function to create random Token for user
 const generateSessionToken = async () => {
@@ -59,5 +61,77 @@ export const createSessionsAndSetCookies = async (userId: any) => {
     isValid: true,
     expiresAt: tokenExpiry,
   });
+
+  // create and store cookies in browswer
+
+  const cookieStore = await cookies();
+  cookieStore.set("session", token, {
+    httpOnly: true,
+    secure: true,
+    // sameSite: "lax",
+    // path: "/",
+    maxAge: SESSION_LIFETIME, // 7 days
+  });
+
   return result;
+};
+
+//# function to get loggedIn user info using cookie and session
+
+export type AuthSession = {
+  ipAddress: string;
+  userAgent: string;
+  expiresAt: Date;
+  isValid: boolean;
+  createdAt: Date;
+};
+
+export type CurrentUserWithSession = {
+  user: {
+    userId: string;
+    fullName: string;
+    email: string;
+    role: "applicant" | "employer" | "admin";
+    createdAt: Date;
+  };
+  session: AuthSession;
+};
+
+export const validateSessionAndGetUserDetails = async (
+  sessionToken: string,
+): Promise<CurrentUserWithSession | null> => {
+  const hashedToken = crypto
+    .createHash("sha-256")
+    .update(sessionToken)
+    .digest("hex");
+
+  await connectDB();
+
+  const matchWithTokenFromDB = await Session.findOne({
+    token: hashedToken,
+    expiresAt: { $gt: new Date() },
+  });
+  if (!matchWithTokenFromDB) return null;
+
+  const userDetails = await User.findById(matchWithTokenFromDB.userId).select(
+    "fullName userId email role createdAt",
+  );
+  if (!userDetails) return null;
+
+  return {
+    user: {
+      userId: userDetails.userId,
+      fullName: userDetails.fullName,
+      email: userDetails.email,
+      role: userDetails.role,
+      createdAt: userDetails.createdAt,
+    },
+    session: {
+      ipAddress: matchWithTokenFromDB.ipAddress,
+      userAgent: matchWithTokenFromDB.userAgent,
+      expiresAt: matchWithTokenFromDB.expiresAt,
+      isValid: matchWithTokenFromDB.isValid,
+      createdAt: matchWithTokenFromDB.createdAt,
+    },
+  };
 };
