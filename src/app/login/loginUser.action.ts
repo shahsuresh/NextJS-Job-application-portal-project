@@ -6,6 +6,7 @@ import User from "@/models/user.model";
 import { RegistrationFormData } from "../register/page";
 import { LoginFormData } from "./page";
 import { loginUserValidationSchema } from "@/features/auth/validationSchemas";
+import { createSessionsAndSetCookies } from "@/features/auth/sessions";
 
 const loginFormAction = async (
   loginFormData: LoginFormData,
@@ -31,13 +32,13 @@ const loginFormAction = async (
         message: `Invalid Credentials`,
       };
     }
-    console.log(isUserExist);
+    // console.log(isUserExist);
     const hashedPassword = isUserExist?.password;
     const isPasswordMatch = await argon2.verify(
       hashedPassword,
       String(password),
     );
-    console.log(isPasswordMatch);
+    // console.log(isPasswordMatch);
 
     if (!isPasswordMatch) {
       return {
@@ -45,6 +46,9 @@ const loginFormAction = async (
         message: `Invalid Credentials`,
       };
     }
+    const sessionData = await createSessionsAndSetCookies(isUserExist._id);
+    console.log("SESSION DATA", sessionData);
+    console.log(isUserExist._id);
 
     return {
       success: true,

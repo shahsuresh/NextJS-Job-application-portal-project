@@ -20,6 +20,7 @@ import SubmitButton from "@/components/common/SubmitButton";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginUserValidationSchema } from "@/features/auth/validationSchemas";
+import { FieldError } from "@/components/common/ErrorMessage";
 export interface LoginFormData {
   userId: string;
 
@@ -104,9 +105,9 @@ const LoginPage: React.FC = () => {
                   id='userId'
                   {...register("userId")}
                   placeholder='Enter Your userid or email'
-                  required
                   className='pl-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                 />
+                <FieldError error={errors.userId?.message} />
               </div>
             </div>
 
@@ -127,6 +128,8 @@ const LoginPage: React.FC = () => {
                   placeholder='Enter Your Password'
                   className='pl-11 pr-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                 />
+                <FieldError error={errors.password?.message} />
+
                 <button
                   type='button'
                   onClick={() => setShowPassword(!showPassword)}

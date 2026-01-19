@@ -29,6 +29,7 @@ import { registerUserValidationSchema } from "@/features/auth/validationSchemas"
 import { FieldError } from "@/components/common/ErrorMessage";
 
 export interface RegistrationFormData {
+  _id?: string;
   fullName: string;
   userId: string;
   email: string;
@@ -242,13 +243,13 @@ const RegistrationPage: React.FC = () => {
               <Label className='text-sm font-semibold text-gray-700'>
                 I am*
               </Label>
-              <div className=''>
+              <div className='w-full'>
                 <Controller
                   name='role'
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className='h-11'>
+                      <SelectTrigger className='h-11 w-full'>
                         <SelectValue placeholder='Select your role' />
                       </SelectTrigger>
                       <SelectContent>

@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
+import { string } from "zod";
 
 const sessionSchema = new mongoose.Schema(
   {
+    token: { type: string },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
     userAgent: {
@@ -24,7 +26,7 @@ const sessionSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Session =
