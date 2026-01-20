@@ -1,4 +1,4 @@
-import { SESSION_LIFETIME } from "@/config/constants";
+import { SESSION_LIFETIME, SESSION_REFRESH_TIME } from "@/config/constants";
 import connectDB from "@/lib/db";
 import Session from "@/models/session.model";
 import User from "@/models/user.model";
@@ -100,6 +100,7 @@ export type CurrentUserWithSession = {
 export const validateSessionAndGetUserDetails = async (
   sessionToken: string,
 ): Promise<CurrentUserWithSession | null> => {
+  if (!sessionToken) return null;
   const hashedToken = crypto
     .createHash("sha-256")
     .update(sessionToken)
@@ -109,15 +110,29 @@ export const validateSessionAndGetUserDetails = async (
 
   const matchWithTokenFromDB = await Session.findOne({
     token: hashedToken,
+    isValid: true,
     expiresAt: { $gt: new Date() },
-  });
+  }).lean();
   if (!matchWithTokenFromDB) return null;
 
-  const userDetails = await User.findById(matchWithTokenFromDB.userId).select(
-    "fullName userId email role createdAt",
-  );
+  //Note:  delete expired tokens from db
+
+  const userDetails = await User.findById(matchWithTokenFromDB.userId)
+    .select("fullName userId email role createdAt")
+    .lean();
   if (!userDetails) return null;
 
+  //session refresh/ session rotation(Only valid session)
+
+  if (
+    Date.now() >=
+    matchWithTokenFromDB.expiresAt.getTime() - SESSION_REFRESH_TIME * 1000
+  ) {
+    await Session.updateOne(
+      { _id: matchWithTokenFromDB._id },
+      { $set: { expiresAt: new Date(Date.now() + SESSION_LIFETIME * 1000) } },
+    );
+  }
   return {
     user: {
       userId: userDetails.userId,

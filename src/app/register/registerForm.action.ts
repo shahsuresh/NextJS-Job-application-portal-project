@@ -94,6 +94,7 @@ import argon2 from "argon2";
 export type RegisterState = {
   success: boolean;
   message: string;
+  redirectUrl?: string;
 };
 
 type RegisterPayload = {

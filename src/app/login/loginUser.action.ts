@@ -7,7 +7,6 @@ import { RegistrationFormData } from "../register/page";
 import { LoginFormData } from "./page";
 import { loginUserValidationSchema } from "@/features/auth/validationSchemas";
 import { createSessionsAndSetCookies } from "@/features/auth/sessions";
-import { cookies } from "next/headers";
 
 const loginFormAction = async (
   loginFormData: LoginFormData,
@@ -27,7 +26,7 @@ const loginFormAction = async (
       $or: [{ email: userId }, { userId }],
     });
 
-    if (!isUserExist) {
+    if (!isUserExist || !isUserExist.password) {
       return {
         success: false,
         message: `Invalid Credentials`,
@@ -51,16 +50,28 @@ const loginFormAction = async (
 
     const sessionData = await createSessionsAndSetCookies(isUserExist._id);
     console.log("SESSION DATA", sessionData);
-    console.log(isUserExist._id);
+
+    let redirectUrl = "/";
+
+    switch (isUserExist.role) {
+      case "applicant":
+        redirectUrl = "/dashboard/applicant";
+        break;
+
+      case "employer":
+        redirectUrl = "/dashboard/employer";
+        break;
+    }
 
     return {
       success: true,
-      message: `Welcome ${isUserExist?.fullName},You are logged in`,
+      message: `Welcome ${isUserExist.fullName}, you are logged in`,
+      redirectUrl,
     };
   } catch (error) {
     return {
       success: false,
-      message: `Something went wrong.${error}`,
+      message: `Something went wrong. Please try again later`,
     };
   }
 };

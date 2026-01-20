@@ -20,7 +20,7 @@ import Link from "next/link";
 import React, { ChangeEvent, useActionState, useEffect, useState } from "react";
 import registerFormAction, { RegisterState } from "./registerForm.action";
 import { useFormStatus } from "react-dom";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import SubmitButton from "@/components/common/SubmitButton";
 import { Controller, useForm } from "react-hook-form";
@@ -60,15 +60,24 @@ const RegistrationPage: React.FC = () => {
   });
 
   //# onSubmit function to call server Action
+  const router = useRouter();
 
   const onSubmit = async (data: RegistrationFormData) => {
     const result = await registerFormAction(data);
 
-    if (result.success) {
-      toast.success(result.message);
-      redirect("/login");
-    } else {
+    if (!result.success) {
       toast.error(result.message);
+      return;
+    }
+
+    toast.success(result.message);
+
+    if (data.role === "applicant") {
+      router.push("/dashboard/applicant");
+    } else if (data.role === "employer") {
+      router.push("/dashboard/employer");
+    } else {
+      router.push("/login");
     }
   };
 

@@ -1,5 +1,4 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,14 +12,14 @@ import { Eye, EyeOff, Lock, User, UserCheck } from "lucide-react";
 import Link from "next/link";
 import React, { ChangeEvent, useActionState, useEffect, useState } from "react";
 import loginFormAction from "./loginUser.action";
-import { RegisterState } from "../register/registerForm.action";
 import { toast } from "sonner";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import SubmitButton from "@/components/common/SubmitButton";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginUserValidationSchema } from "@/features/auth/validationSchemas";
 import { FieldError } from "@/components/common/ErrorMessage";
+import { getCurrentUser } from "@/features/use-cases/auth.queries";
 export interface LoginFormData {
   userId: string;
 
@@ -32,6 +31,7 @@ const LoginPage: React.FC = () => {
   //   password: "",
   // });
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   // const handleInputChange = (field: string, value: string) => {
   //   setFormData((prevData) => ({
@@ -68,7 +68,9 @@ const LoginPage: React.FC = () => {
     const result = await loginFormAction(data);
     if (result.success) {
       toast.success(result.message);
-      redirect("/dashboard");
+      if (result.redirectUrl) {
+        router.push(result.redirectUrl);
+      }
     } else {
       toast.error(result.message);
     }

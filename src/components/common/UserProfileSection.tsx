@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/features/use-cases/auth.queries";
 import { redirect } from "next/navigation";
 
-const DashboardPage = async () => {
+const UserProfileSection = async () => {
   const currentUser = await getCurrentUser();
   if (!currentUser) redirect("/login");
   console.log("CURRENT-USER", currentUser);
@@ -24,4 +24,4 @@ const DashboardPage = async () => {
   );
 };
 
-export default DashboardPage;
+export default UserProfileSection;
