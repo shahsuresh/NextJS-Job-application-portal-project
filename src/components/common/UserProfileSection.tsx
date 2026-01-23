@@ -1,5 +1,8 @@
 import { getCurrentUser } from "@/features/use-cases/auth.queries";
 import { redirect } from "next/navigation";
+import { Button } from "../ui/button";
+import { LucideLogOut, PowerOffIcon } from "lucide-react";
+import { logoutAction } from "@/app/login/logout.action";
 
 const UserProfileSection = async () => {
   const currentUser = await getCurrentUser();
@@ -10,6 +13,11 @@ const UserProfileSection = async () => {
       <div className='flex items-center justify-between p-2 border-2 border-amber-600 rounded-xl'>
         <h1>Dashboard Page</h1>
         <h2>Welcome {currentUser?.user?.fullName}</h2>
+        <span>
+          <Button onClick={logoutAction}>
+            <LucideLogOut />
+          </Button>
+        </span>
       </div>
       <div className='p-4 h-1/4 bg-amber-100 border-2 shadow-2xl'>
         <h1>Name:{currentUser?.user?.fullName}</h1>
