@@ -21,7 +21,8 @@ export const logoutAction = async (): Promise<{ success: boolean }> => {
     .digest("hex");
 
   // Invalidate session in DB
-  await Session.updateOne({ token: hashedToken }, { isValid: false });
+  await Session.deleteOne({ token: hashedToken });
+  // await Session.updateOne({ token: hashedToken }, { isValid: false });
 
   // Remove cookie
   cookieStore.delete("session");

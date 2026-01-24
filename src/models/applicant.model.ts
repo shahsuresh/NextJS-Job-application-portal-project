@@ -45,6 +45,7 @@ const applicantSchema = new mongoose.Schema(
         "masters",
         "phd",
       ],
+      default: "high school",
     },
     website_url: {
       type: String,

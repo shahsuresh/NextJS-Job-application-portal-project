@@ -2,11 +2,12 @@ import mongoose from "mongoose";
 
 const employerSchema = new mongoose.Schema(
   {
-    name: {
+    companyName: {
       type: String,
       trim: true,
-      maxLength: 100,
+      maxLength: 200,
       required: true,
+      default: "Your Company",
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,

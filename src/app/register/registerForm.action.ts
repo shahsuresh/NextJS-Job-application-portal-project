@@ -88,8 +88,11 @@
 import { createSessionsAndSetCookies } from "@/features/auth/sessions";
 import { registerUserValidationSchema } from "@/features/auth/validationSchemas";
 import connectDB from "@/lib/db";
+import Applicant from "@/models/applicant.model";
+import Employeer from "@/models/employer.model";
 import User from "@/models/user.model";
 import argon2 from "argon2";
+import mongoose from "mongoose";
 
 export type RegisterState = {
   success: boolean;
@@ -140,17 +143,45 @@ const registerFormAction = async (
 
     const hashedPassword = await argon2.hash(password);
 
-    const newUser = await User.create({
-      fullName,
-      userId,
-      email,
-      password: hashedPassword,
-      role,
-    });
+    //# use transaction to either perform all actions completely or none and revert back all(if any operation failed)
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    // create session data and set cookies in browser after successfull registration
+    try {
+      const newUser = await User.create({
+        fullName,
+        userId,
+        email,
+        password: hashedPassword,
+        role,
+      });
 
-    await createSessionsAndSetCookies(newUser._id);
+      if (role === "applicant") {
+        await Applicant.create({
+          userId: newUser._id,
+        });
+      } else {
+        await Employeer.create({
+          userId: newUser._id,
+        });
+      }
+
+      // create session data and set cookies in browser after successfull registration
+
+      await createSessionsAndSetCookies(newUser._id);
+
+      await session.commitTransaction();
+    } catch (error) {
+      await session.abortTransaction();
+      return {
+        success: false,
+        message: `Error!! ${error}`,
+      };
+    } finally {
+      session.endSession();
+    }
+
+    //# end transaction
 
     return {
       success: true,
