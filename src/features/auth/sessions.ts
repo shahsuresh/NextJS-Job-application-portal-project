@@ -93,6 +93,7 @@ export type CurrentUserWithSession = {
     email: string;
     role: "applicant" | "employer" | "admin";
     createdAt: Date;
+    _id: string;
   };
   session: AuthSession;
 };
@@ -118,7 +119,7 @@ export const validateSessionAndGetUserDetails = async (
   //Note:  delete expired tokens from db
 
   const userDetails = await User.findById(matchWithTokenFromDB.userId)
-    .select("fullName userId email role createdAt")
+    .select("fullName userId email role createdAt _id")
     .lean();
   if (!userDetails) return null;
 
@@ -140,6 +141,7 @@ export const validateSessionAndGetUserDetails = async (
       email: userDetails.email,
       role: userDetails.role,
       createdAt: userDetails.createdAt,
+      _id: userDetails._id,
     },
     session: {
       ipAddress: matchWithTokenFromDB.ipAddress,
