@@ -44,7 +44,7 @@ const UserProfileSection = async () => {
     );
   }
 
-  const { data } = await getCurrentEmployerDetails(currentUser?.user?._id);
+  const { data } = await getCurrentEmployerDetails();
 
   console.log("EMP_DATA", data);
 

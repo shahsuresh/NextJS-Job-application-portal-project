@@ -78,7 +78,8 @@ export const employerProfileValidationSchema = z.object({
     .trim()
     .toLowerCase()
     .max(100, "Website link cannot be more than 100 characters")
-    .optional(),
+    .optional()
+    .or(z.literal("")),
 
   location: z
     .string()
