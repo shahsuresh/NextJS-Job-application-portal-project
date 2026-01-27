@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Lock, User, UserCheck } from "lucide-react";
+import { Eye, EyeOff, Lock, LockOpen, User, UserCheck } from "lucide-react";
 import Link from "next/link";
 import React, { ChangeEvent, useActionState, useEffect, useState } from "react";
 import loginFormAction from "./loginUser.action";
@@ -81,7 +81,7 @@ const LoginPage: React.FC = () => {
       <Card className='w-full max-w-md shadow-2xl border-0'>
         <CardHeader className='space-y-3 text-center pb-6'>
           <div className='mx-auto w-16 h-16 bg-linear-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg'>
-            <UserCheck className='w-8 h-8 text-white' />
+            <LockOpen className='w-8 h-8 text-white' />
           </div>
           <CardTitle className='text-3xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent'>
             Login to Job Portal

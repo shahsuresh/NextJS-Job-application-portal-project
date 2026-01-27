@@ -1,3 +1,4 @@
+import { COMPANY_TYPES } from "@/config/constants";
 import mongoose from "mongoose";
 
 const employerSchema = new mongoose.Schema(
@@ -23,8 +24,8 @@ const employerSchema = new mongoose.Schema(
       type: String,
     },
     banner_image_url: { type: String },
-    organization_type: { type: String, maxLength: 100 },
-    team_size: { type: Number },
+    organization_type: { type: String, enum: COMPANY_TYPES },
+    team_size: { type: String },
     year_of_establishment: { type: String },
     website: {
       type: String,

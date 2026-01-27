@@ -20,7 +20,7 @@ const navigationItems = [
   { name: "Dashboard", icon: LayoutDashboard, href: base },
   { name: "Profile", icon: User, href: base + "/profile" },
   { name: "Post a Job", icon: Plus, href: base + "/post-job" },
-  { name: "My Jobs", icon: Briefcase, href: base + "/my-jobs" },
+  { name: "My Jobs", icon: Briefcase, href: base + "/myjobs" },
   {
     name: "Saved Candidates",
     icon: Bookmark,
@@ -31,7 +31,7 @@ const navigationItems = [
     icon: CreditCard,
     href: base + "/applications",
   },
-  { name: "All Companies", icon: Building, href: base + "/all-companies" },
+  { name: "All Companies", icon: Building, href: base + "/mycompanies" },
   { name: "Settings", icon: Settings, href: base + "/settings" },
 ];
 

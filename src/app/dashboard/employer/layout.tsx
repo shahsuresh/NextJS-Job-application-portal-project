@@ -17,7 +17,7 @@ export default async function EmployerDashboardLayout({
   return (
     <div className='flex min-h-screen bg-gray-50'>
       {/* Sidebar */}
-      <aside className='w-64 border-r bg-white'>
+      <aside className='w-64 border-r bg-white   '>
         <EmployerSidebarMenu />
       </aside>
 

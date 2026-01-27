@@ -31,6 +31,19 @@ const UserProfileSection = async () => {
   if (!currentUser) redirect("/login");
   console.log("CURRENT-USER", currentUser);
 
+  const { role } = currentUser.user;
+
+  if (role === "applicant") {
+    return (
+      <div className='mt-1'>
+        <div className='flex items-center justify-between border-b-2 border-amber-600 mx-1 '>
+          <h1>Applicant Dashboard</h1>
+          <h2 className='uppercase'>Welcome, {currentUser?.user?.fullName}</h2>
+        </div>
+      </div>
+    );
+  }
+
   const { data } = await getCurrentEmployerDetails(currentUser?.user?._id);
 
   console.log("EMP_DATA", data);
@@ -89,7 +102,7 @@ const UserProfileSection = async () => {
               profile to access all features.
             </h2>
           </div>
-          <Link href='/dashboard/employer/profile'>
+          <Link href='/dashboard/employer/settings'>
             <Button variant='destructive'>Complete Profile</Button>
           </Link>
         </div>
