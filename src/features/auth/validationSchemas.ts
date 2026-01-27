@@ -1,4 +1,6 @@
+import { required } from "zod/v4-mini";
 import { z } from "zod";
+import { COMPANY_TYPES, TEAM_SIZES } from "@/config/constants";
 
 export const registerUserValidationSchema = z
   .object({
@@ -22,10 +24,9 @@ export const registerUserValidationSchema = z
       ),
 
     email: z
-      .string()
+      .email("Must be a valid email address")
       .trim()
       .toLowerCase()
-      .email("Must be a valid email address")
       .max(80, "Email cannot be more than 80 characters"),
 
     password: z
@@ -51,3 +52,40 @@ export const loginUserValidationSchema = z.object({
   userId: z.string().trim().nonempty("Username or Email is required"),
   password: z.string().trim().nonempty("Password is required to login"),
 });
+
+//# Employer Profile Data Validation
+export const employerProfileValidationSchema = z.object({
+  companyName: z
+    .string()
+    .nonempty("Company Name is Required")
+    .trim()
+    .max(100, "Company name cannot be of more than 100 Characters long"),
+  description: z.string().nonempty("Description is required").trim(),
+  avatar_url: z.string().optional(),
+  banner_image_url: z.string().optional(),
+  team_size: z.enum(TEAM_SIZES, "Select a valid team size"),
+
+  year_of_establishment: z
+    .string()
+    .nonempty("Year of establishment is required")
+    .regex(/^\d{4}$/, "Enter a valid year")
+    .refine((year) => {
+      const currentYear = new Date().getFullYear();
+      return parseInt(year) <= currentYear && parseInt(year) >= 1800;
+    }, `Enter a valid year between 1800 and ${new Date().getFullYear()}`),
+  website: z
+    .url("Enter a valid website URL")
+    .trim()
+    .toLowerCase()
+    .max(100, "Website link cannot be more than 100 characters")
+    .optional(),
+
+  location: z
+    .string()
+    .trim()
+    .nonempty("Location is required")
+    .max(300, "Location can be of mote than 300 characters long"),
+  organization_type: z.enum(COMPANY_TYPES, "Select a valid organization type"),
+});
+
+export type IFormInputData = z.infer<typeof employerProfileValidationSchema>;

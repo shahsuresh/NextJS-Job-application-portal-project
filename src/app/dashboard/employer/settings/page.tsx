@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { COMPANY_TYPES } from "@/config/constants";
+import { COMPANY_TYPES, TEAM_SIZES } from "@/config/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Building2,
@@ -31,24 +31,27 @@ import {
   UserCheck2,
   UserPen,
 } from "lucide-react";
-import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 import { UpdateEmployerProfileData } from "./completeProfile.action";
 import { toast } from "sonner";
 import { redirect } from "next/navigation";
+import {
+  employerProfileValidationSchema,
+  IFormInputData,
+} from "@/features/auth/validationSchemas";
 
-type ORGANIZATION_TYPE = (typeof COMPANY_TYPES)[number];
-export interface IFormInput {
-  companyName: string;
-  description: string;
-  avatar_url?: string;
-  banner_image_url?: string;
-  team_size: string;
-  year_of_establishment: string;
-  website: string;
-  location: string;
-  organization_type: ORGANIZATION_TYPE;
-}
+// type ORGANIZATION_TYPE = (typeof COMPANY_TYPES)[number];
+// export interface IFormInput {
+//   companyName: string;
+//   description: string;
+//   avatar_url?: string;
+//   banner_image_url?: string;
+//   team_size: TeamSize;
+//   year_of_establishment: string;
+//   website?: string;
+//   location: string;
+//   organization_type: ORGANIZATION_TYPE;
+// }
 
 const Settings = () => {
   const {
@@ -56,11 +59,11 @@ const Settings = () => {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<IFormInput>({
-    // resolver: zodResolver(),
+  } = useForm<IFormInputData>({
+    resolver: zodResolver(employerProfileValidationSchema),
   });
 
-  const onSubmit = async (data: IFormInput) => {
+  const onSubmit = async (data: IFormInputData) => {
     const result = await UpdateEmployerProfileData(data);
     if (result.success) {
       toast.success(result.message);
@@ -68,7 +71,6 @@ const Settings = () => {
     } else {
       toast.error(result.message);
     }
-    console.log(data);
   };
   return (
     <div className='min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-2'>
@@ -102,6 +104,7 @@ const Settings = () => {
                   placeholder='Upload company logo'
                   className='pl-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                 />
+                <FieldError error={errors.avatar_url?.message} />
               </div>
             </div>
             {/* Cover Image */}
@@ -116,6 +119,7 @@ const Settings = () => {
                   placeholder='Upload cover image'
                   className='pl-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                 />
+                <FieldError error={errors.banner_image_url?.message} />
               </div>
             </div>
 
@@ -136,7 +140,7 @@ const Settings = () => {
                   placeholder='Enter Your Company Name'
                   className='pl-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                 />
-                {/* <FieldError error={errors.fullName?.message} /> */}
+                <FieldError error={errors.companyName?.message} />
               </div>
             </div>
 
@@ -156,7 +160,7 @@ const Settings = () => {
                   {...register("description")}
                   className='pl-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                 />
-                {/* <FieldError error={errors.userId?.message} /> */}
+                <FieldError error={errors.description?.message} />
               </div>
             </div>
 
@@ -188,6 +192,7 @@ const Settings = () => {
                     </Select>
                   )}
                 />
+                <FieldError error={errors.organization_type?.message} />
               </div>
 
               {/* Team Size */}
@@ -205,18 +210,18 @@ const Settings = () => {
                         <SelectValue placeholder='Number of employees' />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value='2-10'>1–10</SelectItem>
-                        <SelectItem value='11-30'>11–30</SelectItem>
-                        <SelectItem value='31-50'>31–50</SelectItem>
-                        <SelectItem value='51-100'>51–100</SelectItem>
-                        <SelectItem value='101-200'>101-200</SelectItem>
-                        <SelectItem value='201-500'>201-500</SelectItem>
-                        <SelectItem value='501-1000'>501-1000</SelectItem>
-                        <SelectItem value='1000+'>1000+</SelectItem>
+                        <SelectContent>
+                          {TEAM_SIZES.map((size) => (
+                            <SelectItem key={size} value={size}>
+                              {size}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
                       </SelectContent>
                     </Select>
                   )}
                 />
+                <FieldError error={errors.team_size?.message} />
               </div>
             </div>
 
@@ -234,6 +239,7 @@ const Settings = () => {
                     placeholder='YYYY'
                     className='pl-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                   />
+                  <FieldError error={errors.year_of_establishment?.message} />
                 </div>
               </div>
 
@@ -249,6 +255,7 @@ const Settings = () => {
                     placeholder='https://example.com'
                     className='pl-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                   />
+                  <FieldError error={errors.website?.message} />
                 </div>
               </div>
             </div>
@@ -270,8 +277,8 @@ const Settings = () => {
                   placeholder='Enter location'
                   className='pl-11 pr-11 h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all'
                 />
+                <FieldError error={errors.location?.message} />
               </div>
-              {/* <FieldError error={errors.confirmPassword?.message} /> */}
             </div>
             {/* Submit Button */}
             <div className='pt-2'>
