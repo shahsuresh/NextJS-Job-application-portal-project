@@ -78,7 +78,7 @@ const EmployerSettingPage = ({ existingData }: EmployerSettingPageProps) => {
     register,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<IFormInputData>({
     defaultValues: {
       companyName: existingData?.companyName || "",
@@ -317,8 +317,14 @@ const EmployerSettingPage = ({ existingData }: EmployerSettingPageProps) => {
                 buttonText='Update'
                 loadingText='Updating...'
                 isLoading={isSubmitting}
+                disabled={!isDirty}
               />
             </div>
+            {isDirty ? null : (
+              <p className='text-sm text-gray-500 mt-0.5 float-end'>
+                No changes to Save
+              </p>
+            )}
             {/* <div className='text-center space-y-1'>
               <span>Already Registered? </span>
               <Link href={"/login"} className='text-blue-500'>
