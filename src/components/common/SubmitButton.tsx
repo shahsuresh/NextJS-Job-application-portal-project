@@ -7,6 +7,7 @@ interface SubmitButtonProps {
   loadingText?: string;
   isLoading?: boolean;
   className?: string;
+  disabled?: boolean;
 }
 
 const SubmitButton = ({
@@ -14,15 +15,16 @@ const SubmitButton = ({
   loadingText = "Submitting...",
   isLoading = false,
   className,
+  disabled,
 }: SubmitButtonProps) => {
   return (
     <Button
       type='submit'
-      disabled={isLoading}
+      disabled={isLoading || disabled}
       aria-busy={isLoading}
       className={cn(
         "w-full h-12 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200",
-        className
+        className,
       )}
     >
       {isLoading ? (
