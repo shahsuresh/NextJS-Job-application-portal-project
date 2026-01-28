@@ -23,15 +23,15 @@ export default async function EmployerDashboardLayout({
 
   return (
     <CurrentUserProvider value={plainUser}>
-      <div className='flex min-h-screen bg-gray-50'>
+      <div className='min-h-screen bg-gray-50'>
         {/* Sidebar */}
-        <aside className='w-64 border-r bg-white   '>
+        <aside className='fixed left-0 top-0 h-screen w-64 border-r bg-white overflow-y-auto'>
           <EmployerSidebarMenu />
         </aside>
 
         {/* Main Content */}
-        <main className='flex-1 p-3'>
-          <div className='rounded-xl bg-white p-6 shadow-sm'>{children}</div>
+        <main className='ml-64 min-h-screen p-1'>
+          <div className=' bg-white p-4 shadow-sm'>{children}</div>
         </main>
       </div>
     </CurrentUserProvider>
